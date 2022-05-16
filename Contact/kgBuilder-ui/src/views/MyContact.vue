@@ -269,7 +269,8 @@ export default {
         nodeList: []
       },
       graph: {
-        nodes: [],
+        nodes: [
+        ],
         links: []
       },
       jsonShow: false,
@@ -475,6 +476,7 @@ export default {
       let node = this.nodeGroup
         .selectAll(".node >circle")
         .data(nodes, function(d) {
+          d.r = 60
           return d.uuid + "_" + d.r + "_" + d.color; //d3数据驱动，r,color是表单中的可改变项，如果此处只设置了uuid,改变项可能不生效
         });
       node.exit().remove();
@@ -832,7 +834,8 @@ export default {
         clearTimeout(_this.timer);
       });
       nodeEnter.on("dblclick", function(d) {
-        _this.updateNodeName(d); // 双击更新节点名称
+        _this.getMoreNode(); // 扩展节点
+        // _this.updateNodeName(d); // 双击更新节点名称
       });
       nodeEnter.on("mouseenter", function(d) {
         let aa = d3.select(this)._groups[0][0];
@@ -1440,6 +1443,7 @@ export default {
         pageSize: this.pageModel.pageSize,
         command: 0
       };
+      console.log(data)
       this.getLabels(data);
     },
     matchDomainGraph(domain) {
