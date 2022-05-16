@@ -339,7 +339,7 @@ public class KGGraphRepository implements KGGraphDao {
                 graphNodeList = Neo4jUtil.getGraphNode(cypherSql);
             } else {
                 entity.setColor("#ff4500");// 默认颜色
-                entity.setR(30);// 默认半径
+                entity.setR(50);// 默认半径
                 String propertiesString = Neo4jUtil.getFilterPropertiesJson(JsonHelper.toJSONString(entity));
                 String cypherSql = String.format("create (n:`%s` %s) return n", domain, propertiesString);
                 graphNodeList = Neo4jUtil.getGraphNode(cypherSql);
@@ -496,7 +496,7 @@ public class KGGraphRepository implements KGGraphDao {
     public List<HashMap<String, Object>> batchCreateSameNode(String domain, Integer entityType, String[] sourceNames) {
         List<HashMap<String, Object>> rss = new ArrayList<HashMap<String, Object>>();
         try {
-            String cypherSqlFmt = "create (n:`%s`{name:'%s',color:'#ff4500',r:30}) return n";
+            String cypherSqlFmt = "create (n:`%s`{name:'%s',color:'#ff4500',r:50}) return n";
             for (String tn : sourceNames) {
                 String sourceNodeSql = String.format(cypherSqlFmt, domain, tn, entityType);
                 List<HashMap<String, Object>> targetNodeList = Neo4jUtil.getGraphNode(sourceNodeSql);
