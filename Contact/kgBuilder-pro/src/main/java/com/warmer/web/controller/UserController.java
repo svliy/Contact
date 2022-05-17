@@ -12,13 +12,18 @@ import com.warmer.web.common.Constants;
 import com.warmer.web.common.Result;
 import com.warmer.web.entity.DTO.UserDTO;
 import com.warmer.web.entity.KgDomain;
+import com.warmer.web.entity.KgFeedBack;
 import com.warmer.web.entity.User;
+import com.warmer.web.entity.VO.KgFeedBackListVO;
+import com.warmer.web.entity.VO.KgFeedBackVO;
 import com.warmer.web.entity.VO.UserVO;
 import com.warmer.web.service.KgDomainService;
+import com.warmer.web.service.KgFeedBackService;
 import com.warmer.web.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -30,6 +35,8 @@ public class UserController {
     private UserService userService;
     @Autowired
     private KgDomainService kgDomainService;
+    @Autowired
+    private KgFeedBackService kgFeedBackService;
 
     @GetMapping("/page")
     public Result findPage(@RequestParam Integer pageNum,
@@ -132,5 +139,37 @@ public class UserController {
         updateWrapper.set("pub",0)
                 .eq("name",domainName);
         return kgDomainService.update(updateWrapper);
+    }
+
+    @ResponseBody
+    @PostMapping(value = "/addfeedback")
+    public Boolean addfeedback(@RequestBody KgFeedBackVO kgFeedBackVO){
+        KgFeedBack kgFeedBack = new KgFeedBack();
+        kgFeedBack.setDomainId(kgFeedBackVO.getDomainId());
+        kgFeedBack.setUserId(kgFeedBackVO.getUserId());
+        kgFeedBack.setContent(kgFeedBackVO.getContent());
+        return kgFeedBackService.save(kgFeedBack);
+    }
+
+    @GetMapping("/getFeedBackList/{domainId}")
+    public Result getFeedBackListById(@PathVariable Integer domainId) {
+        QueryWrapper<KgFeedBack> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("domain_id", domainId);
+        queryWrapper.eq("is_active", 1);
+        List<KgFeedBack> kgFeedBackList = kgFeedBackService.list(queryWrapper);
+        List<KgFeedBackListVO> listVOS = new ArrayList<>();
+        for(int i = 0; i < kgFeedBackList.size(); i++) {
+            KgFeedBack kgFeedBack = kgFeedBackList.get(i);
+            KgFeedBackListVO kgFeedBackListVO = new KgFeedBackListVO();
+            kgFeedBackListVO.setContent(kgFeedBack.getContent());
+            kgFeedBackListVO.setTime(kgFeedBack.getCreateTime());
+            // 根据评论图谱的用户id查询所有的用户名字
+            QueryWrapper<User> queryWrapper1 = new QueryWrapper<>();
+            queryWrapper1.eq("id",kgFeedBack.getUserId());
+            User user = userService.getOne(queryWrapper1);
+            kgFeedBackListVO.setName(user.getUsername());
+            listVOS.add(kgFeedBackListVO);
+        }
+        return Result.success(listVOS);
     }
 }

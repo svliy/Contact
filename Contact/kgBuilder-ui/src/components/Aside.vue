@@ -23,22 +23,34 @@
 <!--        <span slot="title">主页</span>-->
 <!--      </template>-->
 <!--    </el-menu-item>-->
-    <el-menu-item index="/">
-      <template slot="title">
-        <i class="el-icon-s-grid"></i>
-        <span slot="title">公共知识图谱</span>
-      </template>
-    </el-menu-item>
     <el-menu-item index="mycontact">
       <template slot="title">
         <i class="el-icon-share"></i>
         <span slot="title">个人知识图谱</span>
       </template>
     </el-menu-item>
-<!--    <el-menu-item index="mycontact">-->
+    <el-menu-item index="/">
+      <template slot="title">
+        <i class="el-icon-s-grid"></i>
+        <span slot="title">公共知识图谱</span>
+      </template>
+    </el-menu-item>
+    <el-menu-item index="feedback">
+      <template slot="title">
+        <i class="el-icon-coin"></i>
+        <span slot="title">反馈模块</span>
+      </template>
+    </el-menu-item>
+    <el-menu-item index="tongji">
+      <template slot="title">
+        <i class="el-icon-chat-dot-square"></i>
+        <span slot="title">统计模块</span>
+      </template>
+    </el-menu-item>
+<!--    <el-menu-item index="ciyun">-->
 <!--      <template slot="title">-->
-<!--        <i class="el-icon-coin"></i>-->
-<!--        <span slot="title">统计模块</span>-->
+<!--        <i class="el-icon-cloudy"></i>-->
+<!--        <span slot="title">图谱词云</span>-->
 <!--      </template>-->
 <!--    </el-menu-item>-->
     <el-submenu index="2">

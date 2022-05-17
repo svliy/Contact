@@ -162,5 +162,14 @@ class kgBuilderApi extends BaseAPI{
     });
   }
 
+  getGraphData() {
+    return this.get("/getGraphData",'',{
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+
+  }
+
 }
 export default new kgBuilderApi();

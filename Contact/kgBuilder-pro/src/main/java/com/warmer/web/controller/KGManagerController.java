@@ -1,5 +1,6 @@
 package com.warmer.web.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.csvreader.CsvWriter;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.github.pagehelper.PageHelper;
@@ -11,6 +12,7 @@ import com.warmer.web.entity.KgDomain;
 import com.warmer.web.entity.KgFeedBack;
 import com.warmer.web.entity.KgNodeDetail;
 import com.warmer.web.entity.KgNodeDetailFile;
+import com.warmer.web.entity.VO.KgDataListVO;
 import com.warmer.web.model.NodeItem;
 import com.warmer.web.request.*;
 import com.warmer.web.service.FeedBackService;
@@ -18,6 +20,8 @@ import com.warmer.web.service.KgGraphService;
 import com.warmer.web.service.KnowledgeGraphService;
 import com.warmer.web.service.impl.KnowledgeGraphServiceImpl;
 import io.swagger.models.auth.In;
+import okhttp3.Route;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.*;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -69,7 +74,7 @@ public class KGManagerController extends BaseController {
         try {
             List<KgDomain> domain = knowledgeGraphService.getDomainByName(query.getDomain());
             HashMap<String, Object> graphData = new HashMap<>();
-            graphData.put("data",domain);
+            graphData.put("data", domain);
             return R.success(graphData);
         } catch (Exception e) {
             e.printStackTrace();
@@ -89,7 +94,7 @@ public class KGManagerController extends BaseController {
         GraphPageRecord<KgDomain> resultRecord = new GraphPageRecord<KgDomain>();
         try {
             PageHelper.startPage(queryItem.getPageIndex(), queryItem.getPageSize(), true);
-            List<KgDomain> domainList = kgService.getDomainList(queryItem.getDomain(), queryItem.getType(),queryItem.getCommend());
+            List<KgDomain> domainList = kgService.getDomainList(queryItem.getDomain(), queryItem.getType(), queryItem.getCommend());
             PageInfo<KgDomain> pageInfo = new PageInfo<KgDomain>(domainList);
             long total = pageInfo.getTotal();
             resultRecord.setPageIndex(queryItem.getPageIndex());
@@ -117,6 +122,47 @@ public class KGManagerController extends BaseController {
     }
 
     @ResponseBody
+    @RequestMapping(value = "/getAllDataByList")
+    public R<HashMap<String, Object>> getAllDataByList(@RequestBody KgDataListVO kgDataListVO) {
+        try {
+            String[] domainNameList = kgDataListVO.getDomainNameList();
+            List<String> list = new ArrayList<>();
+            for (String domainName : domainNameList) {
+                if (domainName.indexOf('@') != -1)
+                    list.add(domainName);
+            }
+            list.forEach(System.out::println);
+
+
+            List<HashMap<String, Object>> hashMapList = new ArrayList<>();
+            for (String listItem : list) {
+                GraphQuery query = new GraphQuery();
+                query.setDomain(listItem);
+                HashMap<String, Object> tmp = kgGraphService.getDomainGraph(query);
+                HashMap<String, Object> graphData = new HashMap<>();
+
+                ArrayList domaindata = (ArrayList)tmp.get("domaindata");
+                KgDomain kgDomainTmp = (KgDomain)domaindata.get(0);
+                String name = (String) kgDomainTmp.get("name");
+                name = StringUtils.substringBefore(name, "@");
+                graphData.put("DomainName", name);
+
+                ArrayList node = (ArrayList)tmp.get("node");
+                graphData.put("NodeNumber", node.size());
+
+                ArrayList relationship = (ArrayList)tmp.get("relationship");
+                graphData.put("RelationshipNumber", relationship.size());
+                hashMapList.add(graphData);
+            }
+            return R.success(hashMapList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.error(e.getMessage());
+        }
+
+    }
+
+    @ResponseBody
     @RequestMapping(value = "/getCypherResult")
     public R<KgDomain> getCypherResult(String cypher) {
         try {
@@ -126,6 +172,41 @@ public class KGManagerController extends BaseController {
             e.printStackTrace();
             return R.error(e.getMessage());
         }
+    }
+
+    /**
+     * 获取所有的数据
+     *
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/getGraphData", method = RequestMethod.GET)
+    public R<KgDomain> getGraphData() {
+        String cypher = "MATCH (n1)-[r]->(n2) RETURN r, n1, n2";
+        R<KgDomain> cypherResult = getCypherResult(cypher);
+        int x = 0;
+        return cypherResult;
+    }
+
+    /**
+     * 获取所有的域及其节点和关系个数
+     *
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/getAllDataForTJ", method = RequestMethod.GET)
+    public R<KgDomain> geAllDataForTJ() throws IllegalAccessException {
+        String cypher = "CALL db.labels()";
+        R<KgDomain> cypherResult = getCypherResult(cypher);
+
+//        HashMap<String,Object> hashMap1 = cypherResult.getData();
+//        Collection<Object> values = hashMap1.values();
+//        Object[] objects = values.toArray();
+//
+//        Object obj = objects[0];
+//        Map<String, Object> objectToMap = getObjectToMap(obj);
+//        System.out.println(objectToMap);
+        return cypherResult;
     }
 
     @ResponseBody
@@ -146,14 +227,14 @@ public class KGManagerController extends BaseController {
 
     @ResponseBody
     @RequestMapping(value = "/createDomain")
-    public R<String> createDomain(String domain,Integer type) {
+    public R<String> createDomain(String domain, Integer type) {
         try {
             if (!StringUtil.isBlank(domain)) {
                 List<KgDomain> domainItem = kgService.getDomainByName(domain);
                 if (domainItem.size() > 0) {
                     return R.create(ReturnStatus.Error, "领域已存在");
                 } else {
-                   int domainId= kgService.quickCreateDomain(domain,type);// 保存到mysql
+                    int domainId = kgService.quickCreateDomain(domain, type);// 保存到mysql
                     kgGraphService.createDomain(domain);// 保存到图数据
                     return R.success(domainId);
                 }
@@ -236,8 +317,8 @@ public class KGManagerController extends BaseController {
 
         HashMap<String, Object> rss = new HashMap<String, Object>();
         try {
-            String[] tNames=request.getTargetNames().split(",");
-            rss = kgGraphService.batchCreateNode(request.getDomain(), request.getSourceName(), request.getRelation(),tNames);
+            String[] tNames = request.getTargetNames().split(",");
+            rss = kgGraphService.batchCreateNode(request.getDomain(), request.getSourceName(), request.getRelation(), tNames);
             return R.success(rss);
         } catch (Exception e) {
             e.printStackTrace();
@@ -252,7 +333,7 @@ public class KGManagerController extends BaseController {
 
         HashMap<String, Object> rss = new HashMap<String, Object>();
         try {
-            String[] tNames=request.getTargetNames().split(",");
+            String[] tNames = request.getTargetNames().split(",");
             rss = kgGraphService.batchCreateChildNode(request.getDomain(), request.getSourceId(), request.getEntityType(), tNames, request.getRelation());
             return R.success(rss);
         } catch (Exception e) {
@@ -350,10 +431,10 @@ public class KGManagerController extends BaseController {
             label = StringUtil.isBlank(label) ? UuidUtil.getUUID() : label;
             String type = request.getParameter("type");
             if (type.equals("0")) {//三元组导入
-                kgService.quickCreateDomain(label,2);// 三元组
+                kgService.quickCreateDomain(label, 2);// 三元组
                 kgGraphService.importBySyz(file, request, label);
             } else {
-                kgService.quickCreateDomain(label,3);//excel分类
+                kgService.quickCreateDomain(label, 3);//excel分类
                 kgGraphService.importByCategory(file, request, label);
             }
             return R.success("操作成功");
@@ -366,8 +447,8 @@ public class KGManagerController extends BaseController {
 
     @ResponseBody
     @RequestMapping(value = "/exportGraph")
-    public Map<String,Object> exportGraph(HttpServletRequest request) {
-        Map<String,Object> res=new HashMap<>();
+    public Map<String, Object> exportGraph(HttpServletRequest request) {
+        Map<String, Object> res = new HashMap<>();
         String label = request.getParameter("domain");
         String filePath = config.getLocation();
         String fileName = UUID.randomUUID() + ".csv";
@@ -375,7 +456,7 @@ public class KGManagerController extends BaseController {
         String cypher = String.format(
                 "MATCH (n:`%s`) -[r]->(m:`%s`) return n.name as source,m.name as target,r.name as relation", label, label);
         List<HashMap<String, Object>> list = Neo4jUtil.getGraphTable(cypher);
-        if(list.size()==0){
+        if (list.size() == 0) {
             res.put("code", -1);
             res.put("message", "该领域没有任何有关系的实体!");
             return res;
@@ -399,7 +480,7 @@ public class KGManagerController extends BaseController {
             }
             csvWriter.close();
             String serverUrl = request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
-            String csvUrl = "http://"+serverUrl + "/download/" + fileName;
+            String csvUrl = "http://" + serverUrl + "/download/" + fileName;
 
             res.put("code", 200);
             res.put("fileName", csvUrl);
@@ -471,7 +552,7 @@ public class KGManagerController extends BaseController {
     }
 
 
-//    @ResponseBody
+    //    @ResponseBody
     @RequestMapping(value = "/getNodeContent")
     public R<Map<String, Object>> getNodeContent(Integer domainId, Integer nodeId) {
         System.out.println(domainId);
@@ -510,6 +591,7 @@ public class KGManagerController extends BaseController {
             return R.error(e.getMessage());
         }
     }
+
     @ResponseBody
     @RequestMapping(value = "/feedBack")
     public R<Map<String, Object>> feedBack(KgFeedBack submitItem) {
@@ -521,6 +603,7 @@ public class KGManagerController extends BaseController {
             return R.error(e.getMessage());
         }
     }
+
     @ResponseBody
     @RequestMapping(value = "/saveNodeImage")
     public R<String> saveNodeImage(@RequestBody Map<String, Object> params) {

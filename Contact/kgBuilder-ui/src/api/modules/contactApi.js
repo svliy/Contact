@@ -53,7 +53,29 @@ class contactApi {
       }
     })
   }
+  addFeedBack(date) {
+    return request.post("/user/addfeedback", date, {
+      headers: { 'Content-Type': "application/json;charset=utf-8" },
+    })
+  }
 
+  getFeedBackList(date) {
+    return request.get("/user/getFeedBackList/" + date, {
+      headers: { 'Content-Type': "application/json;charset=utf-8" },
+    });
+  }
+
+  getAllDataForTJ(date) {
+    return request.get("/getAllDataForTJ", {
+      headers: { 'Content-Type': "application/json;charset=utf-8" },
+    });
+  }
+
+  getAllDataByList(data) {
+    return request.post("/getAllDataByList", data,{
+      headers: { 'Content-Type': "application/json;charset=utf-8" },
+    });
+  }
 }
 
 export default new contactApi();

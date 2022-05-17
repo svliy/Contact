@@ -122,6 +122,9 @@
         <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">
           <el-button type="primary" icon="el-icon-search" @click="getShortPath">搜索</el-button>
         </el-col>
+<!--        <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">-->
+<!--          <el-button type="primary" icon="el-icon-search" @click="updateGraphNodeSize(30)">更改节点大小</el-button>-->
+<!--        </el-col>-->
       </el-row>
       <!-- 中部 -->
       <el-scrollbar class="mind-cen" id="graphcontainerdiv">
@@ -476,7 +479,297 @@ export default {
       let node = this.nodeGroup
         .selectAll(".node >circle")
         .data(nodes, function(d) {
-          d.r = 60
+          d.r = 70
+          return d.uuid + "_" + d.r + "_" + d.color; //d3数据驱动，r,color是表单中的可改变项，如果此处只设置了uuid,改变项可能不生效
+        });
+      node.exit().remove();
+      let nodeEnter = this.drawNode(node);
+      node = nodeEnter.merge(node).text(function(d) {
+        return d.name;
+      });
+      // 更新节点文字
+      let nodeText = this.nodeTextGroup
+        .selectAll("text")
+        .data(nodes, function(d) {
+          return d.uuid;
+        });
+      nodeText.exit().remove();
+      let nodeTextEnter = this.drawNodeText(nodeText);
+      nodeText = nodeTextEnter.merge(nodeText).text(function(d) {
+        return d.name;
+      });
+      nodeText
+        .append("title") // 为每个节点设置title
+        .text(function(d) {
+          return d.name;
+        });
+      // 更新节点标识
+      let nodeSymbol = this.nodeSymbolGroup
+        .selectAll("path")
+        .data(nodes, function(d) {
+          return d.uuid;
+        });
+      nodeSymbol.exit().remove();
+      let nodeSymbolEnter = this.drawNodeSymbol(nodeSymbol);
+      nodeSymbol = nodeSymbolEnter.merge(nodeSymbol);
+      nodeSymbol.attr("fill", "#e15500");
+      nodeSymbol.attr("display", function(d) {
+        if (typeof d.hasFile != "undefined" && d.hasFile > 0) {
+          return "block";
+        }
+        return "none";
+      });
+      this.simulation.nodes(nodes).on("tick", ticked);
+      this.simulation.force("link").links(links);
+      this.simulation.alphaTarget(1).restart();
+      function linkArc(d) {
+        let dx = d.target.x - d.source.x,
+          dy = d.target.y - d.source.y,
+          dr = Math.sqrt(dx * dx + dy * dy),
+          unevenCorrection = d.sameUneven ? 0 : 0.5;
+        let curvature = 2,
+          arc =
+            (1.0 / curvature) *
+            ((dr * d.maxSameHalf) / (d.sameIndexCorrected - unevenCorrection));
+        if (d.sameMiddleLink) {
+          arc = 0;
+        }
+        let dd =
+          "M" +
+          d.source.x +
+          "," +
+          d.source.y +
+          "A" +
+          arc +
+          "," +
+          arc +
+          " 0 0," +
+          d.sameArcDirection +
+          " " +
+          d.target.x +
+          "," +
+          d.target.y;
+        return dd;
+      }
+
+      function ticked() {
+        link.attr("d", linkArc);
+        // 更新节点坐标
+        node
+          .attr("cx", function(d) {
+            return d.x;
+          })
+          .attr("cy", function(d) {
+            return d.y;
+          });
+        // 更新节点操作按钮组坐标
+        nodeButton
+          .attr("cx", function(d) {
+            return d.x;
+          })
+          .attr("cy", function(d) {
+            return d.y;
+          });
+        nodeButton.attr("transform", function(d) {
+          return "translate(" + d.x + "," + d.y + ") scale(1)";
+        });
+
+        // 更新文字坐标
+        nodeText
+          .attr("x", function(d) {
+            return d.x;
+          })
+          .attr("y", function(d) {
+            return d.y;
+          });
+        // 更新回形针坐标
+        nodeSymbol.attr("transform", function(d) {
+          return (
+            "translate(" + (d.x + 8) + "," + (d.y - 30) + ") scale(0.015,0.015)"
+          );
+        });
+      }
+      // 鼠标滚轮缩放
+      //this.svg.call(d3.zoom().transform, d3.zoomIdentity);//缩放至初始倍数
+      this.svg.call(
+        d3.zoom().on("zoom", function() {
+          d3.select("#link_menubar").style("display", "none");
+          d3.select("#nodeDetail").style("display", "none");
+          d3.selectAll(".node").attr("transform", d3.event.transform);
+          d3.selectAll(".nodeText").attr("transform", d3.event.transform);
+          d3.selectAll(".line").attr("transform", d3.event.transform);
+          d3.selectAll(".lineText").attr("transform", d3.event.transform);
+          d3.selectAll(".nodeSymbol").attr("transform", d3.event.transform);
+          d3.selectAll(".nodeButton").attr("transform", d3.event.transform);
+          //this.svg.selectAll("g").attr("transform", d3.event.transform);
+        })
+      );
+      this.svg.on("dblclick.zoom", null); // 静止双击缩放
+      //按钮组事件
+      let _this = this;
+      this.svg.selectAll(".buttongroup").on("click", function(d, i) {
+        if (_this.nodeButtonAction) {
+          switch (_this.nodeButtonAction) {
+            case "EDIT":
+              let formNode = {
+                uuid: d.uuid,
+                name: d.name,
+                r: d.r,
+                color: d.color
+              };
+              _this.$refs.kg_form.initNode(
+                true,
+                "nodeEdit",
+                formNode,
+                _this.domainId
+              );
+              break;
+            case "MORE":
+              _this.getMoreNode();
+              break;
+            case "CHILD":
+              _this.$refs.kg_form.init(true, "batchAddChild");
+              break;
+            case "LINK":
+              _this.isAddLink = true;
+              _this.selectSourceNodeId = d.uuid;
+              break;
+            case "DELETE":
+              _this.selectNode.nodeId = d.uuid;
+              let out_buttongroup_id = ".out_buttongroup_" + d.uuid + "_" + i;
+              _this.deleteNode(out_buttongroup_id);
+              break;
+          }
+          //ACTION = '';//重置 ACTION
+        }
+      });
+      //按钮组事件绑定
+      this.svg.selectAll(".action_0").on("click", function(d) {
+        _this.nodeButtonAction = "EDIT";
+      });
+      this.svg.selectAll(".action_1").on("click", function(d) {
+        _this.nodeButtonAction = "MORE";
+      });
+      this.svg.selectAll(".action_2").on("click", function(d) {
+        _this.nodeButtonAction = "CHILD";
+      });
+      this.svg.selectAll(".action_3").on("click", function(d) {
+        _this.nodeButtonAction = "LINK";
+      });
+      this.svg.selectAll(".action_4").on("click", function(d) {
+        _this.nodeButtonAction = "DELETE";
+      });
+    },
+    // 更新画布中节点的大小
+    updateGraphNodeSize(size) {
+      let lks = this.graph.links;
+      let nodes = this.graph.nodes;
+      let links = [];
+      //由后端传过来的节点坐标，固定节点，由于是字符串，需要转换
+      nodes.forEach(function(n) {
+        if (typeof n.fx == "undefined" || n.fx == "" || n.fx == null) {
+          n.fx = null;
+        }
+        if (typeof n.fy == "undefined" || n.fy == "" || n.fy == null) {
+          n.fy = null;
+        }
+        if (typeof n.fx == "string") n.fx = parseFloat(n.fx);
+        if (typeof n.fy == "string") n.fy = parseFloat(n.fy);
+        if (typeof n.r == "string") n.r = parseInt(n.r);
+      });
+      lks.forEach(function(m) {
+        let sourceNode = nodes.filter(function(n) {
+          return n.uuid === m.sourceId;
+        })[0];
+        if (typeof sourceNode == "undefined") return;
+        let targetNode = nodes.filter(function(n) {
+          return n.uuid === m.targetId;
+        })[0];
+        if (typeof targetNode == "undefined") return;
+        links.push({ source: sourceNode.uuid, target: targetNode.uuid, lk: m });
+      });
+      //为每一个节点定制按钮组
+      this.addNodeButton();
+      if (links.length > 0) {
+        _.each(links, function(link) {
+          let same = _.filter(links, {
+            source: link.source,
+            target: link.target
+          });
+          let sameAlt = _.filter(links, {
+            source: link.target,
+            target: link.source
+          });
+          let sameAll = same.concat(sameAlt);
+          _.each(sameAll, function(s, i) {
+            s.sameIndex = i + 1;
+            s.sameTotal = sameAll.length;
+            s.sameTotalHalf = s.sameTotal / 2;
+            s.sameUneven = s.sameTotal % 2 !== 0;
+            s.sameMiddleLink =
+              s.sameUneven === true &&
+              Math.ceil(s.sameTotalHalf) === s.sameIndex;
+            s.sameLowerHalf = s.sameIndex <= s.sameTotalHalf;
+            s.sameArcDirection = 1;
+            //s.sameArcDirection = s.sameLowerHalf ? 0 : 1;
+            s.sameIndexCorrected = s.sameLowerHalf
+              ? s.sameIndex
+              : s.sameIndex - Math.ceil(s.sameTotalHalf);
+          });
+        });
+        let maxSame = _.chain(links)
+          .sortBy(function(x) {
+            return x.sameTotal;
+          })
+          .last()
+          .value().sameTotal;
+
+        _.each(links, function(link) {
+          link.maxSameHalf = Math.round(maxSame / 2);
+        });
+      }
+      // 更新连线 links
+      let link = this.linkGroup
+        .selectAll(".line >path")
+        .data(links, function(d) {
+          return d.uuid;
+        });
+      link.exit().remove();
+      let linkEnter = this.drawLink(link);
+      link = linkEnter.merge(link);
+      // 更新连线文字
+      this.linkTextGroup
+        .selectAll("text")
+        .data(links, function(d) {
+          return d.uuid;
+        })
+        .exit()
+        .remove(); //移除多余的text dom
+      let linktext = this.linkTextGroup
+        .selectAll("text >textPath")
+        .data(links, function(d) {
+          return d.uuid;
+        });
+      linktext.exit().remove();
+      let linkTextEnter = this.drawLinkText(linktext);
+      linktext = linkTextEnter.merge(linktext).text(function(d) {
+        return d.lk.name;
+      });
+      // 更新节点按钮组
+      d3.selectAll(".nodeButton >g").remove();
+      let nodeButton = this.nodeButtonGroup
+        .selectAll(".nodeButton")
+        .data(nodes, function(d) {
+          return d;
+        });
+      nodeButton.exit().remove();
+      let nodeButtonEnter = this.drawNodeButton(nodeButton);
+      nodeButton = nodeButtonEnter.merge(nodeButton);
+      // 更新节点
+      let node = this.nodeGroup
+        .selectAll(".node >circle")
+        .data(nodes, function(d) {
+          d.r = size
           return d.uuid + "_" + d.r + "_" + d.color; //d3数据驱动，r,color是表单中的可改变项，如果此处只设置了uuid,改变项可能不生效
         });
       node.exit().remove();
@@ -800,7 +1093,7 @@ export default {
           if (typeof d.r == "string") d.r = parseInt(d.r);
           return d.r;
         }
-        return 30;
+        return 60;
       });
       nodeEnter.attr("fill", function(d) {
         if (typeof d.color != "undefined" && d.color != "") {

@@ -25,6 +25,16 @@ const routes = [
         component: () => import("../views/User.vue"),
       },
       {
+        path: "feedback",
+        name: "反馈",
+        component: () => import("../views/Feedback"),
+      },
+      {
+        path: "tongji",
+        name: "统计",
+        component: () => import("../views/Tongji"),
+      },
+      {
         path: "/home",
         name: "首页",
         component: () => import("../views/Home"),
@@ -33,6 +43,11 @@ const routes = [
         path: 'person',
         name: 'Person',
         component: () => import('../views/Person')
+      },
+      {
+        path: "ciyun",
+        name: "图谱词云",
+        component: () => import("../views/Wordcloudchart"),
       },
     ],
   },

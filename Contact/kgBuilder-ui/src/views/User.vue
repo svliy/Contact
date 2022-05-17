@@ -42,10 +42,10 @@
         >批量删除 <i class="el-icon-remove-outline"></i
         ></el-button>
       </el-popconfirm>
-      <el-button type="primary" class="ml-5"
-      >导入 <i class="el-icon-bottom"></i
-      ></el-button>
-      <el-button type="primary">导出 <i class="el-icon-top"></i></el-button>
+<!--      <el-button type="primary" class="ml-5"-->
+<!--      >导入 <i class="el-icon-bottom"></i-->
+<!--      ></el-button>-->
+<!--      <el-button type="primary">导出 <i class="el-icon-top"></i></el-button>-->
     </div>
 
     <el-table

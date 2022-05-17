@@ -125,67 +125,67 @@
             </el-form-item>
           </el-form>
         </el-tab-pane>
-        <el-tab-pane label="添加图片" name="propImage">
-          <el-form>
-            <el-form-item label="本地上传" label-width="120px">
-              <el-upload
-                class=""
-                name="file"
-                ref="upload"
-                :headers="uploadHeader"
-                :action="uploadImageUrl"
-                accept=".jpg,.png"
-                multiple
-                :show-file-list="false"
-                :data="uploadImageParam"
-                :on-success="uploadSuccess"
-                :auto-upload="true"
-              >
-                <el-button slot="trigger" size="small" type="primary"
-                  >选择</el-button
-                >
-              </el-upload>
-            </el-form-item>
-            <el-form-item label="网络地址" label-width="120px">
-              <el-input v-model="netImageUrl" style="width: 60%"></el-input>
-              <a href="javascript:void(0)" @click="addNetImage" class="cg">
-                <i class="el-icon-plus"></i>
-              </a>
-            </el-form-item>
-            <el-form-item label="已选图片" label-width="120px">
-              <ul class="el-upload-list el-upload-list--picture-card">
-                <li
-                  v-for="item in nodeImageList"
-                  class="el-upload-list__item is-success"
-                >
-                  <img
-                    :src="imageUrlFormat(item)"
-                    alt=""
-                    class="el-upload-list__item-thumbnail"
-                  />
-                  <label class="el-upload-list__item-status-label">
-                    <i class="el-icon-upload-success el-icon-check"></i>
-                  </label>
-                  <i class="el-icon-close" @click="imageHandleRemove(item)"></i>
-                  <span class="el-upload-list__item-actions">
-                    <span class="el-upload-list__item-preview">
-                      <i
-                        class="el-icon-zoom-in"
-                        @click="handlePictureCardPreview(item)"
-                      ></i>
-                    </span>
-                    <span class="el-upload-list__item-delete">
-                      <i
-                        class="el-icon-delete"
-                        @click="imageHandleRemove(item)"
-                      ></i>
-                    </span>
-                  </span>
-                </li>
-              </ul>
-            </el-form-item>
-          </el-form>
-        </el-tab-pane>
+<!--        <el-tab-pane label="添加图片" name="propImage">-->
+<!--          <el-form>-->
+<!--            <el-form-item label="本地上传" label-width="120px">-->
+<!--              <el-upload-->
+<!--                class=""-->
+<!--                name="file"-->
+<!--                ref="upload"-->
+<!--                :headers="uploadHeader"-->
+<!--                :action="uploadImageUrl"-->
+<!--                accept=".jpg,.png"-->
+<!--                multiple-->
+<!--                :show-file-list="false"-->
+<!--                :data="uploadImageParam"-->
+<!--                :on-success="uploadSuccess"-->
+<!--                :auto-upload="true"-->
+<!--              >-->
+<!--                <el-button slot="trigger" size="small" type="primary"-->
+<!--                  >选择</el-button-->
+<!--                >-->
+<!--              </el-upload>-->
+<!--            </el-form-item>-->
+<!--            <el-form-item label="网络地址" label-width="120px">-->
+<!--              <el-input v-model="netImageUrl" style="width: 60%"></el-input>-->
+<!--              <a href="javascript:void(0)" @click="addNetImage" class="cg">-->
+<!--                <i class="el-icon-plus"></i>-->
+<!--              </a>-->
+<!--            </el-form-item>-->
+<!--            <el-form-item label="已选图片" label-width="120px">-->
+<!--              <ul class="el-upload-list el-upload-list&#45;&#45;picture-card">-->
+<!--                <li-->
+<!--                  v-for="item in nodeImageList"-->
+<!--                  class="el-upload-list__item is-success"-->
+<!--                >-->
+<!--                  <img-->
+<!--                    :src="imageUrlFormat(item)"-->
+<!--                    alt=""-->
+<!--                    class="el-upload-list__item-thumbnail"-->
+<!--                  />-->
+<!--                  <label class="el-upload-list__item-status-label">-->
+<!--                    <i class="el-icon-upload-success el-icon-check"></i>-->
+<!--                  </label>-->
+<!--                  <i class="el-icon-close" @click="imageHandleRemove(item)"></i>-->
+<!--                  <span class="el-upload-list__item-actions">-->
+<!--                    <span class="el-upload-list__item-preview">-->
+<!--                      <i-->
+<!--                        class="el-icon-zoom-in"-->
+<!--                        @click="handlePictureCardPreview(item)"-->
+<!--                      ></i>-->
+<!--                    </span>-->
+<!--                    <span class="el-upload-list__item-delete">-->
+<!--                      <i-->
+<!--                        class="el-icon-delete"-->
+<!--                        @click="imageHandleRemove(item)"-->
+<!--                      ></i>-->
+<!--                    </span>-->
+<!--                  </span>-->
+<!--                </li>-->
+<!--              </ul>-->
+<!--            </el-form-item>-->
+<!--          </el-form>-->
+<!--        </el-tab-pane>-->
         <el-tab-pane label="添加描述" name="richTextEdit">
           <div
             ref="editorToolbar"

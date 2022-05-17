@@ -1276,6 +1276,7 @@ export default {
         pageSize: this.pageSize
       };
       kgBuilderApi.getDomainGraph(data).then(result => {
+        console.log(result)
         if (result.code == 200) {
           if (result.data != null) {
             this.graph.domaindata = result.data.domaindata;
