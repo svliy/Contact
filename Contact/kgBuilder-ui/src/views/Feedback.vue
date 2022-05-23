@@ -244,6 +244,62 @@
 <!--                    </el-descriptions-item>-->
                   </el-descriptions>
                 </el-col>
+
+<!--                <el-col :span="24">-->
+<!--                 <h4>推荐课程</h4>-->
+<!--                    <ul>-->
+<!--                      <li>1</li>-->
+<!--                      <li>2</li>-->
+<!--                      <li>3</li>-->
+<!--                    </ul>-->
+<!--                </el-col>-->
+
+                <el-col :span="24">
+                  <h4>数据库-推荐课程: UCB CS186</h4>
+                  <ol>
+                    <li><b>课程名字：</b>UCB CS186: Introduction to Database System</li>
+                    <li><b>课程简介：</b>一门以Java语言为基础的手把手构建数据库的优秀入门课程</li>
+                    <li><b>课程网站：</b>https://cs186berkeley.net/sp21/</li>
+                    <li><b>课程视频：</b>https://www.bilibili.com/video/BV13a411c7Qo</li>
+                    <li><b>资源汇总：</b>我在学习这门课中用到的所有资源和作业实现都汇总在
+                      <a href="https://github.com/PKUFlyingPig/CS186">PKUFlyingPig/CS186 - GitHub</a>
+                      中
+                    </li>
+                  </ol>
+                </el-col>
+                <el-col :span="24">
+                  <h4>数据库-推荐课程: CMU 15-445</h4>
+                  <ol>
+                    <li><b>课程名字：</b>CMU 15-445: Database Systems</li>
+                    <li><b>课程亮点:</b> 15-445 会自底向上地教你数据库系统的基本组成部分：存储、索引、查询，以及并发事务控制。</li>
+                    <li><b>课程教材：</b>Database System Concepts</li>
+                    <li><b>课程网站和视频：</b>https://15445.courses.cs.cmu.edu/fall2019/schedule.html</li>
+                    <li><b>后续课程：</b>
+                      <a href="https://15721.courses.cs.cmu.edu/spring2020/">CMU15-721 </a>
+
+                      主要讲主存数据库有关的内容，每节课都有对应的 paper 要读，推荐给希望进阶数据库的小伙伴
+
+                      我目前也在跟进这门课，完成后会在这里提 PR 以提供进阶的指导
+
+                    </li>
+                  </ol>
+                </el-col>
+                <el-col :span="24">
+                  <h4>OS-推荐课程: MIT 6.S081</h4>
+                  <ol>
+                    <li><b>课程名字：</b>MIT 6.S081: Operating System Engineering</li>
+                    <li><b>课程网站：</b>https://pdos.csail.mit.edu/6.828/2021/schedule.html</li>
+                    <li><b>课程亮点:</b> 每周都会有一个 lab，让你在 xv6 上增加一些新的机制和特性，非常注重学生动手能力的培养。</li>
+                    <li><b>课程教材：</b>https://pdos.csail.mit.edu/6.828/2021/xv6/book-riscv-rev2.pdf</li>
+                    <li><b>课程视频：</b>https://www.youtube.com/watch?v=L6YqHxYHa7A，每节课的链接详见课程网站</li>
+                    <li><b>课程作业：</b>https://pdos.csail.mit.edu/6.828/2021/schedule.html，11个lab，具体要求详见课程网站</li>
+                    <li><b>后续课程：</b>
+                      <a href="https://15721.courses.cs.cmu.edu/spring2020/">CMU15-721 </a>
+                      主要讲主存数据库有关的内容，每节课都有对应的 paper 要读，推荐给希望进阶数据库的小伙伴
+                      我目前也在跟进这门课，完成后会在这里提 PR 以提供进阶的指导
+                    </li>
+                  </ol>
+                </el-col>
               </el-row>
 
             </el-card>
@@ -1766,7 +1822,7 @@ export default {
 </script>
 <style>
 .mind-box {
-  height: calc(100vh - 100px);
+  height: calc(100vh - 105px);
   overflow: hidden;
   background-color: white;
   border: 1px solid purple;

@@ -224,4 +224,5 @@ public interface KgGraphService {
 	 *
 	 */
 	HashMap<String, Object> getShortPath(ShortPathQuery query);
+	HashMap<String, Object> getAllPath(ShortPathQuery query);
 }

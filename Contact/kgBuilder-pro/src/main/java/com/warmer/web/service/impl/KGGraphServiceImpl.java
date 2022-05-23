@@ -313,4 +313,9 @@ public class KGGraphServiceImpl implements KgGraphService {
     public HashMap<String, Object> getShortPath(ShortPathQuery query) {
         return kgRepository.getShortPath(query);
     }
+
+    @Override
+    public HashMap<String, Object> getAllPath(ShortPathQuery query) {
+        return kgRepository.getAllPath(query);
+    }
 }

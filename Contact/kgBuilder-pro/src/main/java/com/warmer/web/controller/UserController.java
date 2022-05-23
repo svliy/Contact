@@ -16,6 +16,7 @@ import com.warmer.web.entity.KgFeedBack;
 import com.warmer.web.entity.User;
 import com.warmer.web.entity.VO.KgFeedBackListVO;
 import com.warmer.web.entity.VO.KgFeedBackVO;
+import com.warmer.web.entity.VO.RegisterVO;
 import com.warmer.web.entity.VO.UserVO;
 import com.warmer.web.service.KgDomainService;
 import com.warmer.web.service.KgFeedBackService;
@@ -46,6 +47,15 @@ public class UserController {
                            @RequestParam(defaultValue = "") String address) {
         return Result.success(userService.findPage(new Page<>(pageNum, pageSize), username, email, address));
     }
+
+    @GetMapping("/pageFeebBack")
+    public Result findPageOfFeedBack(@RequestParam Integer pageNum,
+                           @RequestParam Integer pageSize,
+                           @RequestParam(defaultValue = "") String fbId,
+                           @RequestParam(defaultValue = "") String domainId) {
+        return Result.success(userService.findPageOfFb(new Page<>(pageNum, pageSize), fbId, domainId));
+    }
+
 
     @PostMapping("/addUser")
     public Result addUser(@RequestBody UserVO uservo) {
@@ -81,6 +91,18 @@ public class UserController {
     @PostMapping("/deleteUser/{id}")
     public Result deleteUser(@PathVariable Integer id, HttpServletResponse response){
         boolean remove = userService.removeById(id);
+        if(!remove) {
+            return Result.error("400","删除用户失败！");
+        }
+        return Result.success();
+    }
+
+    @PostMapping("/selectFb/{id}")
+    public Result selectFb(@PathVariable Integer id, HttpServletResponse response){
+        KgFeedBack kgFeedBack = new KgFeedBack();
+        kgFeedBack.setId(id);
+        kgFeedBack.setIsActive(String.valueOf(1));
+        boolean remove = kgFeedBackService.updateById(kgFeedBack);
         if(!remove) {
             return Result.error("400","删除用户失败！");
         }
@@ -172,4 +194,17 @@ public class UserController {
         }
         return Result.success(listVOS);
     }
+
+    @ResponseBody
+    @PostMapping(value = "/register")
+    public Boolean addfeedback(@RequestBody RegisterVO registerVO){
+        User user = new User();
+        user.setUsername(registerVO.getUsername());
+        user.setPassword(registerVO.getPassword());
+        user.setAddress(registerVO.getAddress());
+        user.setEmail(registerVO.getEmail());
+        user.setPhone(registerVO.getPhone());
+        return userService.save(user);
+    }
+
 }

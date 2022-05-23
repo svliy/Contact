@@ -120,7 +120,7 @@
       <!-- 头部over -->
       <el-row style=" margin-top: 10px;border-bottom: 1px solid rebeccapurple;border-radius: 4px;">
         <el-col :span="4" style="margin-top: 10px;margin-left: 20px">
-            最短路径搜索:
+          路径搜索:
         </el-col>
         <el-col :span="3">
           <el-input v-model="shortPathDate.startNode" placeholder="请输入起始节点"></el-input>
@@ -129,8 +129,34 @@
           <el-input v-model="shortPathDate.endNode" placeholder="请输入结束节点"></el-input>
         </el-col>
         <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">
-          <el-button type="primary" icon="el-icon-search" @click="getShortPath">搜索</el-button>
+          <el-button type="primary" icon="el-icon-search" @click="getShortPath">最短路径搜索</el-button>
         </el-col>
+        <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">
+          <el-button type="primary" icon="el-icon-search" @click="getAllPath">所有路径搜索</el-button>
+        </el-col>
+        <!--        <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">-->
+        <!--          <el-button type="primary" icon="el-icon-search" @click="updateGraphNodeSize(30)">更改节点大小</el-button>-->
+        <!--        </el-col>-->
+      </el-row>
+      <el-row style=" margin-top: 10px;border-bottom: 1px solid rebeccapurple;border-radius: 4px;">
+        <el-col :span="4" style="margin-top: 10px;margin-left: 20px">
+          搜索相同节点:
+        </el-col>
+        <el-col :span="3">
+          <el-input v-model="getSameData.domain1" placeholder="请输入图谱1"></el-input>
+        </el-col>
+        <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">
+          <el-input v-model="getSameData.domain2" placeholder="请输入图谱2"></el-input>
+        </el-col>
+        <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">
+          <el-button type="primary" icon="el-icon-search" @click="getSameNodes1">搜索(显示图谱1)</el-button>
+        </el-col>
+        <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">
+          <el-button type="primary" icon="el-icon-search" @click="getSameNodes2">搜索(显示图谱2)</el-button>
+        </el-col>
+        <!--        <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">-->
+        <!--          <el-button type="primary" icon="el-icon-search" @click="updateGraphNodeSize(30)">更改节点大小</el-button>-->
+        <!--        </el-col>-->
       </el-row>
       <!-- 中部 -->
       <el-scrollbar class="mind-cen" id="graphcontainerdiv">
@@ -227,6 +253,10 @@ export default {
   },
   data() {
     return {
+      getSameData:{
+        domain1: "",
+        domain2: ""
+      },
       tupuname: "",
       shortPathDate:{
         startNode: "",
@@ -306,6 +336,74 @@ export default {
     this.getDomain();
   },
   methods: {
+    getSameNodes1() {
+      var data = {
+        domainName1: this.getSameData.domain1,
+        domainName2: this.getSameData.domain2
+      }
+      console.log(data)
+      kgBuilderApi.getSameNodes(data).then((result)=>{
+        if (result.code == 200) {
+          if (result.data != null) {
+            console.log(result.data)
+            var arr1 = result.data.domain1.node
+            var arr2 = result.data.domain2.node
+            console.log(arr1)
+            console.log(arr2)
+
+            let newArr = []
+            for (let i = 0; i < arr2.length; i++) {
+              for (let j = 0; j < arr1.length; j++) {
+                if(arr1[j].name === arr2[i].name){
+                  newArr.push(arr1[j])
+                }
+              }
+            }
+            console.log(newArr)
+            // this.graph.nodes = result.data.node;
+            // this.graph.links = result.data.relationship;
+            // this.updateGraph();
+            this.graph.nodes = newArr;
+            // this.graph.links = result.data.relationship;
+            this.updateGraph();
+          }
+        }
+      })
+    },
+    getSameNodes2() {
+      var data = {
+        domainName1: this.getSameData.domain1,
+        domainName2: this.getSameData.domain2
+      }
+      console.log(data)
+      kgBuilderApi.getSameNodes(data).then((result)=>{
+        if (result.code == 200) {
+          if (result.data != null) {
+            console.log(result.data)
+            var arr1 = result.data.domain1.node
+            var arr2 = result.data.domain2.node
+            console.log(arr1)
+            console.log(arr2)
+
+            let newArr = []
+            for (let i = 0; i < arr2.length; i++) {
+              for (let j = 0; j < arr1.length; j++) {
+                if(arr1[j].name === arr2[i].name){
+                  newArr.push(arr2[i])
+                }
+              }
+            }
+            console.log(newArr)
+            // this.graph.nodes = result.data.node;
+            // this.graph.links = result.data.relationship;
+            // this.updateGraph();
+            this.graph.nodes = newArr;
+            // this.graph.links = result.data.relationship;
+            this.updateGraph();
+          }
+        }
+      })
+    },
     getShortPath(){
       var data = {
         startNode: this.shortPathDate.startNode,
@@ -318,6 +416,24 @@ export default {
           if (result.data != null) {
             this.graph.nodes = result.data.node;
             this.graph.links = result.data.relationship;
+            this.updateGraph();
+          }
+        }
+      })
+    },
+    getAllPath(){
+      var data = {
+        startNode: this.shortPathDate.startNode,
+        endNode: this.shortPathDate.endNode,
+        domain: this.tupuname
+      }
+      console.log(data)
+      kgBuilderApi.getAllPath(data).then((result)=>{
+        console.log(result.data.data.data)
+        if (result.code == 200) {
+          if (result.data != null) {
+            this.graph.nodes = result.data.data.data.node;
+            this.graph.links = result.data.data.data.relationship;
             this.updateGraph();
           }
         }
@@ -841,7 +957,8 @@ export default {
         clearTimeout(_this.timer);
       });
       nodeEnter.on("dblclick", function(d) {
-        _this.updateNodeName(d); // 双击更新节点名称
+        // _this.updateNodeName(d); // 双击更新节点名称
+        _this.getMoreNode()
       });
       nodeEnter.on("mouseenter", function(d) {
         let aa = d3.select(this)._groups[0][0];
@@ -1618,14 +1735,14 @@ export default {
 </script>
 <style>
 .mind-box {
-  height: calc(100vh - 100px);
+  height: calc(100vh - 105px);
   overflow: hidden;
   background-color: white;
   border: 1px solid purple;
   border-radius: 10px;
 }
 .mind-l {
-  width: 300px;
+  width: 301px;
   float: left;
   height: 100%;
   border-right: 1px solid #dadce0;

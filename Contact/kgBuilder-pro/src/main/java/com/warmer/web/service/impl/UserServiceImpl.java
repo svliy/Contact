@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.warmer.web.common.Constants;
+import com.warmer.web.dao.KgFeedBackMapper;
 import com.warmer.web.entity.DTO.UserDTO;
+import com.warmer.web.entity.KgFeedBack;
 import com.warmer.web.entity.User;
 import com.warmer.web.dao.UserMapper;
 import com.warmer.web.entity.VO.UserVO;
@@ -23,6 +25,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private KgFeedBackMapper kgFeedBackMapper;
 
     @Override
     public Page<User> findPage(Page<User> objectPage, String username, String email, String address) {
@@ -46,6 +51,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         page.setTotal(userMapper.selectCount(null));
         return page;
     }
+
+    @Override
+    public Page<KgFeedBack> findPageOfFb(Page<User> objectPage, String fbId, String domainId) {
+        Long current = objectPage.getCurrent();
+        Long size = objectPage.getSize();
+        Page<KgFeedBack> page = new Page<>(current,size);
+        QueryWrapper<KgFeedBack> queryWrapper = new QueryWrapper<>();
+        if(StringUtils.isNotBlank(fbId)){
+            queryWrapper.like("id",fbId);
+        }
+        if(StringUtils.isNotBlank(domainId)){
+            queryWrapper.like("domain_id",Integer.valueOf(domainId));
+        }
+        // 设置倒序
+        queryWrapper.orderByDesc("id");
+        queryWrapper.last("limit "+ (current-1)*size + ", " +size);
+        kgFeedBackMapper.selectPage(page, queryWrapper);
+        page.setTotal(kgFeedBackMapper.selectCount(null));
+        return page;
+    }
+
 
     @Override
     public UserDTO login(UserDTO userDTO) {
@@ -73,6 +99,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         return one;
     }
+
 
     private User getUserInfo(UserDTO userDTO) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();

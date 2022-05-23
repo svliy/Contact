@@ -12,7 +12,8 @@
       <label>Password</label>
       <input type="password" v-model="user.password" placeholder="请输入密码" />
 
-      <button type="submit" @click="login">LOGIN</button>
+      <button type="submit" @click="login">登录</button>
+      <button type="submit" @click="toRegister">注册</button>
     </div>
 
 <!--    <div class="line">-->
@@ -53,6 +54,9 @@ export default {
         }
       });
     },
+    toRegister() {
+      this.$router.push("/register");
+    }
   },
 };
 </script>

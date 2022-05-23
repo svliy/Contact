@@ -25,6 +25,11 @@ const routes = [
         component: () => import("../views/User.vue"),
       },
       {
+        path: "feedbackmanage",
+        name: "反馈管理",
+        component: () => import("../views/FeedBackManage"),
+      },
+      {
         path: "feedback",
         name: "反馈",
         component: () => import("../views/Feedback"),
@@ -70,6 +75,11 @@ const routes = [
     path: "/login",
     name: "Login",
     component: () => import("../views/Login.vue"),
+  },
+  {
+    path: "/register",
+    name: "Register",
+    component: () => import("../views/Register.vue"),
   }
 ];
 

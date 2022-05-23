@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-container>
+    <el-container style="height: calc(100vh - 100px)">
       <el-main style="background-color: white;border: 1px solid purple;border-radius: 10px;margin-left: 10px">
 <!--        <el-card class="box-card" shadow="hover" style="margin-top: 20px">-->
 
@@ -90,7 +90,7 @@ export default {
         this.tableData = res.data
         var i = 0
         var strArr1 = ["数", "代数", "几何", "集合", "矩阵", "分析"]
-        var strArr2 = ["Java", "Python", "IT", "系统", "数据库", "计算机", "组成原理"]
+        var strArr2 = ["Java", "Python", "IT", "系统", "数据库", "计算机", "计组", "Python", "原理"]
         for (; i < res.data.length; i++) {
           var Number = res.data[i].NodeNumber +  res.data[i].RelationshipNumber
           var Name = res.data[i].DomainName
@@ -104,6 +104,9 @@ export default {
             this.NCDataList.value2 += Number
           }
           if (res.data[i].DomainName.includes("IT")){
+            this.NCDataList.value2 += Number
+          }
+          if (res.data[i].DomainName.includes("原理")){
             this.NCDataList.value2 += Number
           }
           //Other

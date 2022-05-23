@@ -21,6 +21,13 @@ class contactApi {
     })
   }
 
+  getFeebBackPage(date) {
+    return request.get("/user/pageFeebBack", {
+      params: date.params,
+      headers: { 'Content-Type': "application/json;charset=utf-8" },
+    })
+  }
+
   addUser(date) {
     return request.post("/user/addUser", date, {
       headers: { 'Content-Type': "application/json;charset=utf-8" },
@@ -32,6 +39,13 @@ class contactApi {
       headers: { 'Content-Type': "application/json;charset=utf-8" },
     })
   }
+
+  selectFeedBackById(date) {
+    return request.post("/user/selectFb/" + date,"", {
+      headers: { 'Content-Type': "application/json;charset=utf-8" },
+    })
+  }
+
 
   deleteUserBatchById(date) {
     return request.post("/user/del/batch", date, {
@@ -75,6 +89,12 @@ class contactApi {
     return request.post("/getAllDataByList", data,{
       headers: { 'Content-Type': "application/json;charset=utf-8" },
     });
+  }
+
+  register(date) {
+    return request.post("/user/register", date, {
+      headers: { 'Content-Type': "application/json;charset=utf-8" },
+    })
   }
 }
 

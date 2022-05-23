@@ -9,22 +9,21 @@
           style="margin: 2px 0 4px 2px;"
           plain
           size="small"
-          @click="createDomain"
-        >新建图谱</el-button
-        >
+          @click="createDomain">
+          新建图谱
+        </el-button>
         <div class="ml-a-box" style="min-height:280px">
           <a
             @click="matchDomainGraph(m, $event)"
             v-for="m in pageModel.nodeList"
             href="javascript:void(0)"
-            :title="m.name"
-          >
+            :title="m.name">
             <el-tag
               closable
               style="margin:2px;display: inline-table"
-              @close="deleteDomain(m.id, m.name)"
-            >{{ m.name | fliter1}}</el-tag
-            >
+              @close="deleteDomain(m.id, m.name)">
+              {{ m.name | fliter1}}
+            </el-tag>
           </a>
         </div>
 
@@ -73,9 +72,9 @@
                 @click="setMatchSize(m)"
                 :title="m.size"
                 href="javascript:void(0)"
-                :class="[m.isActive ? 'sd-active' : '', 'sd']"
-              >{{ m.size }}</a
-              >
+                :class="[m.isActive ? 'sd-active' : '', 'sd']">
+                {{ m.size }}
+              </a>
             </span>
           </span>
         </div>
@@ -103,15 +102,15 @@
           <a href="javascript:void(0)" @click="help" class="svg-a-sm">
             <i class="el-icon-info">帮助</i>
           </a>
-          <a href="javascript:void(0)" @click="wanted" class="svg-a-sm">
-            <i class="el-icon-question">反馈</i>
-          </a>
+<!--          <a href="javascript:void(0)" @click="wanted" class="svg-a-sm">-->
+<!--            <i class="el-icon-question">反馈</i>-->
+<!--          </a>-->
         </div>
       </div>
       <!-- 头部over -->
       <el-row style=" margin-top: 10px;border-bottom: 1px solid rebeccapurple;border-radius: 4px;">
         <el-col :span="4" style="margin-top: 10px;margin-left: 20px">
-          最短路径搜索:
+          路径搜索:
         </el-col>
         <el-col :span="3">
           <el-input v-model="shortPathDate.startNode" placeholder="请输入起始节点"></el-input>
@@ -120,11 +119,34 @@
           <el-input v-model="shortPathDate.endNode" placeholder="请输入结束节点"></el-input>
         </el-col>
         <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">
-          <el-button type="primary" icon="el-icon-search" @click="getShortPath">搜索</el-button>
+          <el-button type="pdrimary" icon="el-icon-search" @click="getShortPath">最短路径搜索</el-button>
+        </el-col>
+        <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">
+          <el-button type="primary" icon="el-icon-search" @click="getAllPath">所有路径搜索</el-button>
         </el-col>
 <!--        <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">-->
 <!--          <el-button type="primary" icon="el-icon-search" @click="updateGraphNodeSize(30)">更改节点大小</el-button>-->
 <!--        </el-col>-->
+      </el-row>
+      <el-row style=" margin-top: 10px;border-bottom: 1px solid rebeccapurple;border-radius: 4px;">
+        <el-col :span="4" style="margin-top: 10px;margin-left: 20px">
+          搜索相同节点:
+        </el-col>
+        <el-col :span="3">
+          <el-input v-model="getSameData.domain1" placeholder="请输入图谱1"></el-input>
+        </el-col>
+        <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">
+          <el-input v-model="getSameData.domain2" placeholder="请输入图谱2"></el-input>
+        </el-col>
+        <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">
+          <el-button type="primary" icon="el-icon-search" @click="getSameNodes1">搜索(显示图谱1)</el-button>
+        </el-col>
+        <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">
+          <el-button type="primary" icon="el-icon-search" @click="getSameNodes2">搜索(显示图谱2)</el-button>
+        </el-col>
+        <!--        <el-col :span="3" style="margin-left: 30px;margin-bottom: 10px">-->
+        <!--          <el-button type="primary" icon="el-icon-search" @click="updateGraphNodeSize(30)">更改节点大小</el-button>-->
+        <!--        </el-col>-->
       </el-row>
       <!-- 中部 -->
       <el-scrollbar class="mind-cen" id="graphcontainerdiv">
@@ -222,6 +244,10 @@ export default {
   },
   data() {
     return {
+      getSameData:{
+        domain1: "",
+        domain2: ""
+      },
       tupuname: "",
       shortPathDate:{
         startNode: "",
@@ -241,10 +267,10 @@ export default {
       mouserPos: { left: "-1000px", top: "-1000px" },
       nodeDetail: null,
       pageSizeList: [
-        { size: 500, isActive: true },
+        { size: 200, isActive: true },
         { size: 1000, isActive: false },
         { size: 2000, isActive: false },
-        { size: 5000, isActive: false }
+        // { size: 5000, isActive: false }
       ],
       isAddLink: false,
       isDeleteLink: false,
@@ -301,18 +327,116 @@ export default {
 
   },
   methods: {
-    getShortPath(){
+    getSameNodes1() {
+      var data = {
+        domainName1: this.getSameData.domain1,
+        domainName2: this.getSameData.domain2
+      }
+      console.log(data)
+      kgBuilderApi.getSameNodes(data).then((result)=>{
+        if (result.code == 200) {
+          if (result.data != null) {
+            console.log(result.data)
+            var arr1 = result.data.domain1.node
+            var arr2 = result.data.domain2.node
+            console.log(arr1)
+            console.log(arr2)
+
+            let newArr = []
+            for (let i = 0; i < arr2.length; i++) {
+              for (let j = 0; j < arr1.length; j++) {
+                if(arr1[j].name === arr2[i].name){
+                  newArr.push(arr1[j])
+                }
+              }
+            }
+            console.log(newArr)
+            // this.graph.nodes = result.data.node;
+            // this.graph.links = result.data.relationship;
+            // this.updateGraph();
+            this.graph.nodes = newArr;
+            // this.graph.links = result.data.relationship;
+            this.updateGraph();
+          }
+        }
+      })
+    },
+    getSameNodes2() {
+      var data = {
+        domainName1: this.getSameData.domain1,
+        domainName2: this.getSameData.domain2
+      }
+      console.log(data)
+      kgBuilderApi.getSameNodes(data).then((result)=>{
+        if (result.code == 200) {
+          if (result.data != null) {
+            console.log(result.data)
+            var arr1 = result.data.domain1.node
+            var arr2 = result.data.domain2.node
+            console.log(arr1)
+            console.log(arr2)
+
+            let newArr = []
+            for (let i = 0; i < arr2.length; i++) {
+              for (let j = 0; j < arr1.length; j++) {
+                if(arr1[j].name === arr2[i].name){
+                  newArr.push(arr2[i])
+                }
+              }
+            }
+            console.log(newArr)
+            // this.graph.nodes = result.data.node;
+            // this.graph.links = result.data.relationship;
+            // this.updateGraph();
+            this.graph.nodes = newArr;
+            // this.graph.links = result.data.relationship;
+            this.updateGraph();
+          }
+        }
+      })
+    },
+    getShortPath() {
+      var data = {
+        startNode: this.shortPathDate.startNode,
+        endNode: this.shortPathDate.endNode,
+        domain: this.tupuname
+      }
+      if (data.startNode == '' || data.endNode == '') {
+        this.$notify({
+          title: '警告',
+          message: '请输入非空节点',
+          type: 'warning'
+        });
+      } else {
+        kgBuilderApi.getShortPath(data).then((result)=>{
+          if (result.code == 200) {
+            if (result.data != null) {
+              this.graph.nodes = result.data.node;
+              this.graph.links = result.data.relationship;
+              this.updateGraph();
+            }
+          } else {
+            this.$notify.error({
+              title: '错误',
+              message: '未找到最短路径,请检查输入'
+            });
+          }
+        })
+      }
+    },
+    getAllPath(){
       var data = {
         startNode: this.shortPathDate.startNode,
         endNode: this.shortPathDate.endNode,
         domain: this.tupuname
       }
       console.log(data)
-      kgBuilderApi.getShortPath(data).then((result)=>{
+      kgBuilderApi.getAllPath(data).then((result)=>{
+        console.log(result.data.data.data)
         if (result.code == 200) {
           if (result.data != null) {
-            this.graph.nodes = result.data.node;
-            this.graph.links = result.data.relationship;
+            this.graph.nodes = result.data.data.data.node;
+            this.graph.links = result.data.data.data.relationship;
             this.updateGraph();
           }
         }
@@ -479,7 +603,7 @@ export default {
       let node = this.nodeGroup
         .selectAll(".node >circle")
         .data(nodes, function(d) {
-          d.r = 70
+          // d.r = 70
           return d.uuid + "_" + d.r + "_" + d.color; //d3数据驱动，r,color是表单中的可改变项，如果此处只设置了uuid,改变项可能不生效
         });
       node.exit().remove();
@@ -1078,9 +1202,14 @@ export default {
       //d.fx = d3.event.x;
       //d.fy = d3.event.y;
       let domain = this.domain;
+      if (domain == '') {
+        domain = d.domain
+      }
+      console.log(typeof domain)
       let uuid = d.uuid;
       let fx = d.fx;
       let fy = d.fy;
+      console.log(d.domain)
       let data = { domain: domain, uuid: uuid, fx: fx, fy: fy };
       kgBuilderApi.updateCoordinateOfNode(data).then(result => {});
     },
@@ -1127,6 +1256,11 @@ export default {
         clearTimeout(_this.timer);
       });
       nodeEnter.on("dblclick", function(d) {
+        console.log("2342343243244",typeof d.domain)
+        if( typeof(d.domain)!="undefined") {
+          this.domain = d.domain
+        }
+        console.log("2342343243244",this.domain)
         _this.getMoreNode(); // 扩展节点
         // _this.updateNodeName(d); // 双击更新节点名称
       });
@@ -1271,7 +1405,7 @@ export default {
       let linkEnter = link
         .enter()
         .append("path")
-        .attr("stroke-width", 1)
+        .attr("stroke-width", 2)
         .attr("stroke", "#fce6d4")
         .attr("fill", "none")
         .attr("id", function(d) {
@@ -1407,6 +1541,7 @@ export default {
             message: "已取消删除"
           });
         });
+
     },
     //删除连线
     deleteLink() {
@@ -1572,10 +1707,15 @@ export default {
       let data = { domainId: this.domainId, nodeId: nodeId };
       kgBuilderApi.getNodeDetail(data).then(result => {
         if (result.code == 200) {
+          this.$message({
+            dangerouslyUseHTMLString: true,
+            message: result.data.content
+          });
+          // alert(result.data.content)
           if (result.data) {
             this.$refs.node_richer.init(
               result.data.content,
-              result.data.imageList,
+              // result.data.imageList,
               left,
               top
             );
@@ -1638,6 +1778,7 @@ export default {
     //展开更多节点
     getMoreNode() {
       let data = { domain: this.domain, nodeId: this.selectNode.nodeId };
+
       kgBuilderApi.getMoreRelationNode(data).then(result => {
         if (result.code == 200) {
           //把不存在于画布的节点添加到画布
@@ -1921,7 +2062,7 @@ export default {
   overflow: hidden;
 }
 .mind-l {
-  width: 300px;
+  width: 301px;
   float: left;
   background: #f7f9fc;
   height: 100%;

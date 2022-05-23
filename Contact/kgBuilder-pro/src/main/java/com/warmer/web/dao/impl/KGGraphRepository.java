@@ -197,6 +197,52 @@ public class KGGraphRepository implements KGGraphDao {
     }
 
     /**
+     * 查询所有路径
+     */
+    public HashMap<String, Object> getAllPath(ShortPathQuery query) {
+        HashMap<String, Object> nr = new HashMap<String, Object>();
+        List<KgDomain> domaindata = knowledgeGraphService.getDomainByName(query.getDomain());
+        nr.put("domaindata", domaindata);
+        String nodeSql = "MATCH (startNode: `"+query.getDomain()+"` {name:'"+ query.getStartNode() +"'}), (endNode:`"+query.getDomain()+"` {name:'"+ query.getEndNode() +"'}) call apoc.algo.allSimplePaths(startNode, endNode, null, 50) YIELD path return path";
+//        String nodeSql2 = "MATCH (startNode:`test@1` {name:'A'}), (endNode:`test@1` {name:'D'})  return startNode,endNode";
+        System.out.println(nodeSql);
+        StatementResult result = Neo4jUtil.executeCypherSql(nodeSql);
+        Record record = result.list().get(0);
+        Value value = record.values().get(0);
+        List<Node> nodes = (List) value.asPath().nodes();
+        List<Relationship> relationships = (List) value.asPath().relationships();
+
+        List<HashMap<String, Object>> nodeResult = new ArrayList<>();
+        for (int i = 0; i < nodes.size(); i++) {
+            Node node = nodes.get(i);
+            HashMap<String, Object> tmp = new HashMap<>();
+            tmp.put("uuid", String.valueOf(node.id()));
+            Map<String, Object> nodeMap = node.asMap();
+            for (String o : nodeMap.keySet()) {
+                tmp.put(o, "r".equals(nodeMap.get(o)) ? (Integer)nodeMap.get(o) : nodeMap.get(o));
+            }
+            nodeResult.add(tmp);
+        }
+
+        List<HashMap<String, Object>> relationshipResult = new ArrayList<>();
+        for (int i = 0; i < relationships.size(); i++) {
+            Relationship relationship = relationships.get(i);
+            HashMap<String, Object> tmp = new HashMap<>();
+            tmp.put("uuid", String.valueOf(relationship.id()));
+            tmp.put("sourceId",String.valueOf(relationship.startNodeId()));
+            tmp.put("targetId",String.valueOf(relationship.endNodeId()));
+            Map<String, Object> relationshipMap = relationship.asMap();
+            for(String o: relationshipMap.keySet()){
+                tmp.put(o, relationshipMap.get(o));
+            }
+            relationshipResult.add(tmp);
+        }
+        nr.put("node", nodeResult);
+        nr.put("relationship", relationshipResult);
+        return nr;
+    }
+
+    /**
      * 获取节点列表
      */
     @Override

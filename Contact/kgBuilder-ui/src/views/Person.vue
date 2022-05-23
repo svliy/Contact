@@ -22,6 +22,7 @@
           </el-col>
           <el-card class="card" shadow="hover">
             <div class="information" align="left">
+                <span>用户ID：{{user.id}}</span><br>
                 <span>用户昵称：{{user.nickname}}</span><br>
                 <span>姓名：{{user.username}}</span><br>
                 <span>性别：男</span><br>

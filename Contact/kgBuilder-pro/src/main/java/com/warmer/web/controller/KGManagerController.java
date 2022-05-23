@@ -13,6 +13,7 @@ import com.warmer.web.entity.KgFeedBack;
 import com.warmer.web.entity.KgNodeDetail;
 import com.warmer.web.entity.KgNodeDetailFile;
 import com.warmer.web.entity.VO.KgDataListVO;
+import com.warmer.web.entity.VO.KgSameNodeVO;
 import com.warmer.web.model.NodeItem;
 import com.warmer.web.request.*;
 import com.warmer.web.service.FeedBackService;
@@ -58,8 +59,23 @@ public class KGManagerController extends BaseController {
     public R<HashMap<String, Object>> getShortPath(@RequestBody ShortPathQuery query) {
         try {
             HashMap<String, Object> graphData = kgGraphService.getShortPath(query);
-            int x = 0;
             return R.success(graphData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.error(e.getMessage());
+        }
+
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/getAllPath")
+    public R<HashMap<String, Object>> getAllPath(@RequestBody ShortPathQuery query) {
+        try {
+            HashMap<String, Object> res = new HashMap<>();
+            String nodeSql = "MATCH (startNode: `"+query.getDomain()+"` {name:'"+ query.getStartNode() +"'}), (endNode:`"+query.getDomain()+"` {name:'"+ query.getEndNode() +"'}) call apoc.algo.allSimplePaths(startNode, endNode, null, 50) YIELD path return path";
+            R<KgDomain> cypherResult = getCypherResult(nodeSql);
+            res.put("data",cypherResult);
+            return R.success(res);
         } catch (Exception e) {
             e.printStackTrace();
             return R.error(e.getMessage());
@@ -122,6 +138,32 @@ public class KGManagerController extends BaseController {
     }
 
     @ResponseBody
+    @RequestMapping(value = "/getSameNodes")
+    public R<HashMap<String, Object>> getSameNodes(@RequestBody KgSameNodeVO kgSameNodeVO) {
+        try {
+            GraphQuery query1 = new GraphQuery();
+            query1.setDomain(kgSameNodeVO.getDomainName1());
+            query1.setPageSize(500);
+            HashMap<String, Object> graphData1 = kgGraphService.getDomainGraph(query1);
+
+            GraphQuery query2 = new GraphQuery();
+            query2.setDomain(kgSameNodeVO.getDomainName2());
+            query2.setPageSize(500);
+            HashMap<String, Object> graphData2 = kgGraphService.getDomainGraph(query2);
+
+            HashMap<String, Object> graphData3 = new HashMap<>();
+            graphData3.put("domain1",graphData1);
+            graphData3.put("domain2",graphData2);
+
+            return R.success(graphData3);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.error(e.getMessage());
+        }
+
+    }
+
+    @ResponseBody
     @RequestMapping(value = "/getAllDataByList")
     public R<HashMap<String, Object>> getAllDataByList(@RequestBody KgDataListVO kgDataListVO) {
         try {
@@ -131,13 +173,14 @@ public class KGManagerController extends BaseController {
                 if (domainName.indexOf('@') != -1)
                     list.add(domainName);
             }
-            list.forEach(System.out::println);
+//            list.forEach(System.out::println);
 
 
             List<HashMap<String, Object>> hashMapList = new ArrayList<>();
             for (String listItem : list) {
                 GraphQuery query = new GraphQuery();
                 query.setDomain(listItem);
+                query.setPageSize(500);
                 HashMap<String, Object> tmp = kgGraphService.getDomainGraph(query);
                 HashMap<String, Object> graphData = new HashMap<>();
 

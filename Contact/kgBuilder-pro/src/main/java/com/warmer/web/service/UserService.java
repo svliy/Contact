@@ -3,6 +3,7 @@ package com.warmer.web.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.warmer.web.entity.DTO.UserDTO;
+import com.warmer.web.entity.KgFeedBack;
 import com.warmer.web.entity.User;
 import com.warmer.web.entity.VO.UserVO;
 
@@ -13,4 +14,6 @@ public interface UserService extends IService<User> {
     UserDTO login(UserDTO userDTO);
     // 注册功能
     User register(UserDTO userDTO);
+    // 反馈分页查询
+    Page<KgFeedBack> findPageOfFb(Page<User> objectPage, String fbId, String domainId);
 }

@@ -40,6 +40,15 @@ class kgBuilderApi extends BaseAPI{
       }
     );
   }
+  // 获取所有路径
+  getAllPath(data) {
+    return this.post("/getAllPath",data,{
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+  }
   createDomain(data) {
     return this.get("/createDomain",data);
     // return request({
@@ -168,7 +177,14 @@ class kgBuilderApi extends BaseAPI{
         'Content-Type': 'application/json'
       }
     })
+  }
 
+  getSameNodes(data) {
+    return this.post("/getSameNodes",data,{
+        headers: {
+          'Content-Type': 'application/json'
+        }
+    });
   }
 
 }
